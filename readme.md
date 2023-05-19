@@ -1,110 +1,74 @@
-# Bravo Example on AWS
-Provision infrastructure and deploy BRAVO applications. 
+# BRAVO Deployment with Ansible
 
-To that end, this project is partitioned into two parts.
-The first provisions infrastructure on AWS on which to run the applications.
-The second is an ansible script to deploy and start the application.
+Three roles:
+- Install components & configure.
+- Download, unpack, and load backing data.
+- Run applications as systemd services.
 
 ## Dependencies
+- Requires community.mongodb collection
+    ```
+    ansible-galaxy collection install -r requirements.yml
+    ```
+- Requires `bravo_vignette_data.tar.bz2` in an accessible S3 bucket.
 
-Make sure to record the names of the keypair, bucket, and domain you'll be using.  
-They are required input parameters to the terraform provisioning.
+## Data Loading
+The data loading step is time consuming.
+The role creates lock files to indicate that it's already been run.
+This facilitates a hack to avoid trying to figure out if data needs to be reloaded.
+If data loading needs to be re-done, the lock files on the app server must be removed.
 
-### Software
-- An [AWS account](https://aws.amazon.com).  The resources will incur charges to your account.
-- [AWS CLI installed](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) 
-- [Terraform installed](https://learn.hashicorp.com/tutorials/terraform/install-cli) 
-- [Terraform Cloud](https://cloud.hashicorp.com/products/terraform)
-- AWS Credentials in Terraform Cloud [workspace variables](https://learn.hashicorp.com/tutorials/terraform/cloud-workspace-configure)
-- [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 
+The download task is time consuming, but does **not** produce a lock file nor check if files are already present.
 
-### AWS EC2 KeyPair
-Generate ssh keys to use to access the EC2 instances: 
-[key-pair docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#prepare-key-pair)
+## Auth Configuration
+To enable OAuth using Google as the identity provider, the client id and secrent must be given.
+The following configuration is expected to be in `group_vars/app/auth.yml`
+```yml
+---
+gauth_client_id: "yourcliendid"
+gauth_client_secret: "yourclientsecret"
+```
+When absent, the generated application config will set `DISABLE_LOGIN` to `true`.
 
-### Data in a bucket
-An archive of data needs to be in place in an S3 bucket before running this project.
+## Run deployment
+Prior to running ansible, an ssh config and inventory needs to be built.
+The `make_ansible_support_files.sh` script creates these.
+The script is meant to be run from the `deploy/` directory in which it's located.
 
-For running this project a subset of chr11 has been used to make a small data set.
-It is available here: ftp://share.sph.umich.edu/bravo/bravo_vignette_data.tar.bz2
-The provisioning and deployment expect the archive to be in a S3 bucket.
+The following sub-sections provide the commands for different deployment situations.
 
-For example:
+### Full deployment including download & data loading
+Need to provide three variables `data_bucket` and `load_data` `do_download`.
+Data download, unpacking, and loading can take a long time and should only need to be done once.
+
+- `load_data`: (default false) Load basis data from disk into mongo instance.
+- `do_download`: (default false) Download the data from bucket prior to loading.
+- `data_bucket`: name of your s3 bucket without leading protocol (s3://).
+
 ```sh
-# Create bucket for holding the bravo data.  
-aws s3 mb "s3://my-bravo-bucket" 
-
-# Put data in the bucket
-aws s3 cp ./bravo_vignette_data.tar.bz2 s3://my-bravo-bucket
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' playbook.yml \
+  -e ' load_data=true do_download=true data_bucket=your_bucket_name'
 ```
 
-### Domain name and Certificate
-You'll need a domain registered on
-[Route53](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/registrar.html)
-and a 
-[public TLS certificate](https://docs.aws.amazon.com/acm/latest/userguide/gs-acm-request-public.html) 
-that covers your domain and a bravo subdomain (e.g. bravo.example.com). 
-This **cert name** needs to be the domain and tld.  e.g. example.com.
-The cert needs to have an additional name (SAN) that covers the subdomain.
-E.g. SAN with bravo.example.com or \*.example.com
+### Full deployment with data loading (no bucket download)
+To load the data only for the cases where it's already in place on disk, only `load_data=true` 
+should be specified since `do_download` is false by default.
 
-## 1. Provision Infrastrucutre on AWS
-Terraform config derived from 
-[this Hashicorp tutorial](https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments)
-
-See [Provisioning readme](provision/readme.md).
-
-## 2. Deploy Applications
-Ansible playbook to install, configure, load data, and run BRAVO's components.
-
-See [Deployment readme](deploy/readme.md).
-
-## Use
-Manual run of infrastructure provisioning and deployment of applications.
-
-### Configure Terraform Variables
-Use terraform variables stored in workspace on terraform cloud.
-Or provide a terraform variables file with the name of the keypair, bucket, and domain name you'll be using.
-
-note: the app deployment will wire the application server to the bravo subdomain (e.g. bravo.example.com)
-
-### Run Terraform and Ansible
-First use terraform to provision the VMs and infrastructure.
-Subsequently use ansible to deploy the applications.
-
-```sh 
-# Move into provisioning directory
-cd provision
-
-# Run terraform
-terraform apply
-
-# (Optional) print convenient ssh commands for bastion or app server. 
-./print_ssh_cmd.sh
-
-# Move into deployment directory
-cd ../deploy
-
-# Create Ansible config from terraform cloud plan output
-./make_ansible_support_files.sh
-
-# Run ansible
-ansible-playbook --ssh-common-args='-F inv/deploy-ssh-config' -i 'inv/deploy-inventory' playbook.yml
+```sh
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' playbook.yml -e ' load_data=true'
 ```
 
-## Improvements to be made
+### Deployment including dependencies:
+Updates the machine, installs dependencies, installs application.
+```
+ansible-playbook --ssh-common-args='-F inv/ssh-config' -i 'inv/servers' playbook.yml
+```
 
-- Make it as easy as possible for someone to deploy with as few commands as possible. 
-    - Link to terraform installer
-    - Link to ansible installers.
-- Make as many choices for the end user as you possibly can.
-    - Using default values in the variables
-    - Handling cases to minimize requirements
-        - Make domain & cert optional
-        - Make S3 data bucket optional
-    - Allow specifying a pre-existing VPC
-- List the variables and a description of what they do like Terraform modules
-- Make clear how to get the bravo\_vignette data.
-- Consider makeing and publishing a pre-built AMI or container to avoid Anisble install.
-- Use Ubuntu image for bastion as well for uniformity.
-
+### Just redeploy the python application:
+Only update the application and restart the systemd service running it.
+```
+ansible-playbook --ssh-common-args='-F inv/ssh-config'\
+  -i 'inv/servers' --tags instance playbook.yml
+```
