@@ -6,11 +6,16 @@ Three roles:
 - Run applications as systemd services.
 
 ## Dependencies
-- Requires community.mongodb collection
+- AWS Credentials configured locally.
+- [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 
+- Requires Ansible collection community.mongodb
     ```
     ansible-galaxy collection install -r requirements.yml
     ```
-- Requires `bravo_vignette_data.tar.bz2` in an accessible S3 bucket.
+- ssh keys to use to access the EC2 instances: [key-pair docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#prepare-key-pair)
+
+### Optional Dependency
+Data for staging deployment may be downloaded from an S3 bucket
 
 ## Data Loading
 The data loading step is time consuming.
