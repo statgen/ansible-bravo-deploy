@@ -36,4 +36,4 @@ scratch*
 *.bz2
 
 # sensitive configuration
-deploy/group_vars/**/auth.yml
+group_vars/**/auth.yml
