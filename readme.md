@@ -38,7 +38,7 @@ When absent, the generated application config will set `DISABLE_LOGIN` to `true`
 ## Run deployment
 Prior to running ansible, an ssh config and inventory needs to be built.
 The `make_ansible_support_files.sh` script creates these.
-The script is meant to be run from the `deploy/` directory in which it's located.
+The script is meant to be run from the directory in which it's located.
 
 The following sub-sections provide the commands for different deployment situations.
 

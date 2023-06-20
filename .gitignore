@@ -26,7 +26,7 @@ override.tf.json
 *_override.tf.json
 
 # Build artifacts
-deploy/inv/*
+inv/*
 
 # Scratch files used for one off tests, demos, experiments, etc
 scratch*
