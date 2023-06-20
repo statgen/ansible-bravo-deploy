@@ -36,13 +36,16 @@ gauth_client_secret: "yourclientsecret"
 When absent, the generated application config will set `DISABLE_LOGIN` to `true`.
 
 ## Run deployment
-Prior to running ansible, an ssh config and inventory needs to be built.
+Prior to running ansible, an ssh config and inventory needs to be written.
 The `make_ansible_support_files.sh` script creates these.
 The script is meant to be run from the directory in which it's located.
+By default it reads the terraform cloud project 'bravo-staging'.
+To get the production configs, `export WORKSPACE_NAME=bravo-production` before running the script.
 
 The following sub-sections provide the commands for different deployment situations.
 
 ### Full deployment including download & data loading
+Data will be downloaded from s3 and processes to load data into mongodb will be run.
 Need to provide three variables `data_bucket` and `load_data` `do_download`.
 Data download, unpacking, and loading can take a long time and should only need to be done once.
 
@@ -65,15 +68,17 @@ ansible-playbook --ssh-common-args='-F inv/ssh-config' \
   -i 'inv/servers' playbook.yml -e ' load_data=true'
 ```
 
+### Only redeploy the python application:
+Only update the API and restart the systemd service running it.
+```
+ansible-playbook --ssh-common-args='-F inv/ssh-config'\
+  -i 'inv/servers' --tags instance playbook.yml
+```
+
 ### Deployment including dependencies:
+This is the default run.
 Updates the machine, installs dependencies, installs application.
 ```
 ansible-playbook --ssh-common-args='-F inv/ssh-config' -i 'inv/servers' playbook.yml
 ```
 
-### Just redeploy the python application:
-Only update the application and restart the systemd service running it.
-```
-ansible-playbook --ssh-common-args='-F inv/ssh-config'\
-  -i 'inv/servers' --tags instance playbook.yml
-```
