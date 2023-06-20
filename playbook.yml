@@ -124,7 +124,9 @@
 
     - name: Reload systemd daemons
       ansible.builtin.systemd:
-        name: bravo-api.service.j2
+        name: bravo-api.service
+        state: restarted
+        
 
 
 - hosts: mongo
