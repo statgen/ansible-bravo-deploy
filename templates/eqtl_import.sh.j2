@@ -1,0 +1,15 @@
+#!/usr/bin/bash
+
+# Import data script to be executed on the mongodb host.
+# Drop collection prior to import (overwriting it)
+# Read data directly from S3 without making local copy on disk.
+
+aws s3 cp s3://{{data_bucket}}/basis/eqtl/all.cond.tsv - |\
+  mongoimport \
+    --host="localhost" --db="bravo" --collection=eqtl_cond --drop \
+    --type="tsv" --columnsHaveTypes --headerline --parseGrace=stop  
+
+aws s3 cp s3://{{data_bucket}}/basis/eqtl/all.susie.tsv - |\
+  mongoimport \
+    --host="localhost" --db="bravo" --collection=eqtl_susie --drop \
+    --type="tsv" --columnsHaveTypes --headerline --parseGrace=stop 

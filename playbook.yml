@@ -24,7 +24,6 @@
     - dependencies
     - python
   tasks:
-
     - name: Install python deployment dependencies
       ansible.builtin.apt:
         name:
@@ -43,6 +42,30 @@
           - boto3
           - botocore
         state: present
+
+- hosts: mongo
+  become: yes
+  tags:
+    - dependencies
+  tasks:
+    - name: Unzip
+      ansible.builtin.apt:
+        name:
+          - unzip
+        state: present
+
+    - name: Download aws cli installer
+      ansible.builtin.unarchive:
+        src: "https://awscli.amazonaws.com/awscli-exe-linux-{{ansible_architecture}}.zip"
+        dest: "/tmp"
+        remote_src: true
+        creates: "/tmp/aws"
+        mode: 0755
+
+    - name: Install awscli
+      command:
+        cmd: /tmp/aws/install
+        creates: /usr/local/bin/aws
 
 - hosts: "app:mongo"
   tags:
@@ -190,6 +213,25 @@
       ansible.builtin.include_role:
         name: data_loading
       when: load_data
+
+- hosts: mongo
+  tags:
+    - data
+  tasks:
+    - name: Create import script
+      ansible.builtin.template:
+        mode: 0775
+        dest: "/tmp/eqtl_import.sh"
+        src: templates/eqtl_import.sh.j2
+
+    - name: Import eqtl data
+      block:
+        - name: Run eqtl import script
+          command: /tmp/eqtl_import.sh
+      rescue:
+        - name: Report eqtl import failure
+          ansible.builtin.debug:
+            msg: "Eqtl import did not complete successfully"
 
 - hosts: app
   become: yes
