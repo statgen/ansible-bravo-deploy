@@ -43,6 +43,36 @@
           - botocore
         state: present
 
+- hosts: app
+  become: yes
+  tags:
+    - dependencies
+  tasks:
+    - name: Check for built htslib
+      ansible.builtin.stat:
+        path: "/usr/local/bin/htslib"
+      register: hts_stat
+
+    - name: Build htslib
+      ansible.builtin.include_role:
+        name: htslib
+      when: not hts_stat.stat.exists
+
+- hosts: app
+  tags:
+    - scratch
+  tasks:
+    - name: Prepopluate s3 enabled pysam in API venv
+      ansible.builtin.pip:
+        name: 
+          - pysam
+        virtualenv: "{{inst_dir}}/api/venv"
+        state: present
+        extra_args: "--no-binary pysam"
+      environment:
+        HTSLIB_CONFIGURE_OPTIONS: "--enable-libcurl --enable-s3"
+
+
 - hosts: mongo
   become: yes
   tags:
@@ -149,7 +179,6 @@
       ansible.builtin.systemd:
         name: bravo-api.service
         state: restarted
-        
 
 
 - hosts: mongo

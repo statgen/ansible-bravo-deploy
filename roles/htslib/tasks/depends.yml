@@ -1,0 +1,19 @@
+---
+- name: Install htslib build dependencies
+  ansible.builtin.apt:
+    name:
+      - autoconf
+      - gcc
+      - make
+      - liblzma-dev
+      - libbz2-dev
+      - libcurl4-openssl-dev
+      - libcrypto++-dev
+      - libssl-dev
+    state: present
+
+- name: Install htslib build dependencies
+  ansible.builtin.apt:
+    name:
+      - libhts3
+    state: absent

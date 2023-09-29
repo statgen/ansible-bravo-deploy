@@ -1,8 +1,8 @@
 ---
 # S3 bucket in which the backing data is stored
-data_bucket: "bravo-vignette-example"
+data_bucket: "bravo-staging-data"
 
-# Top level key prefix containing the basis and runtime prefixs (directories)
+# Prefix containing the basis and runtime prefixs (directories)
 data_key: ""
 
 # Flag determining if data download and load is run.

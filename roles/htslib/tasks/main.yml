@@ -1,0 +1,6 @@
+---
+- name: Install dependencies
+  import_tasks: depends.yml
+
+- name: Build htslib with s3 plugin enabled
+  import_tasks: build_htslib.yml

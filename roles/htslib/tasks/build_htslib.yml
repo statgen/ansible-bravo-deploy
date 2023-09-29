@@ -1,0 +1,45 @@
+---
+- name: Download htslib
+  ansible.builtin.get_url:
+    url: "https://github.com/samtools/htslib/releases/download/1.18/htslib-1.18.tar.bz2"
+    dest: "/tmp"
+
+- name: Create temp destination
+  ansible.builtin.file:
+    dest: "/tmp/htslib"
+    state: directory
+
+- name: Unzip htslib
+  ansible.builtin.unarchive:
+    src: "/tmp/htslib-1.18.tar.bz2"
+    remote_src: yes
+    dest: "/tmp/htslib"
+    creates: "/tmp/htslib/htslib-1.18"
+
+- name: htslib autoconf
+  ansible.builtin.command:
+    chdir: "/tmp/htslib/htslib-1.18"
+    argv:
+      - "autoreconf"
+      - "-i"
+
+- name: htslib configure additional functionality
+  ansible.builtin.command:
+    chdir: "/tmp/htslib/htslib-1.18"
+    argv:
+      - "./configure"
+      - "--enable-libcurl"
+      - "--enable-s3"
+
+- name: htslib build
+  ansible.builtin.command:
+    chdir: "/tmp/htslib/htslib-1.18"
+    argv:
+      - "make"
+
+- name: htslib install
+  ansible.builtin.command:
+    chdir: "/tmp/htslib/htslib-1.18"
+    argv:
+      - "make"
+      - "install"
