@@ -1,5 +1,9 @@
 [Unit]
 Description=BRAVO API
+{% if is_aws_environment %}
+Wants=hts-credentials.service
+After=hts-credentials.service
+{% endif %}
 
 [Service]
 Type=simple
@@ -12,6 +16,9 @@ WorkingDirectory={{inst_dir}}/api
 Environment="FLASK_APP=bravo_api"
 Environment="BRAVO_API_CONFIG_FILE=config.py"
 Environment="BRAVO_API_INSTANCE_DIR={{inst_dir}}/api"
+{% if is_aws_environment %}
+Environment="AWS_SHARED_CREDENTIALS_FILE={{inst_dir}}/credentials"
+{% endif %}
 
 RuntimeDirectory=bravo-api
 PIDFile=/run/bravo-api/bravo.pid

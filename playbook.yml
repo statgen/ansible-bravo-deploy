@@ -18,6 +18,8 @@
       reboot:
       when: reboot_required.stat.exists
 
+
+
 - hosts: app
   become: yes
   tags:
@@ -27,6 +29,7 @@
     - name: Install python deployment dependencies
       ansible.builtin.apt:
         name:
+          - jq
           - python3-pip
           - python3-venv
         state: present
@@ -57,21 +60,6 @@
       ansible.builtin.include_role:
         name: htslib
       when: not hts_stat.stat.exists
-
-- hosts: app
-  tags:
-    - scratch
-  tasks:
-    - name: Prepopluate s3 enabled pysam in API venv
-      ansible.builtin.pip:
-        name: 
-          - pysam
-        virtualenv: "{{inst_dir}}/api/venv"
-        state: present
-        extra_args: "--no-binary pysam"
-      environment:
-        HTSLIB_CONFIGURE_OPTIONS: "--enable-libcurl --enable-s3"
-
 
 - hosts: mongo
   become: yes
@@ -147,7 +135,17 @@
         owner: ubuntu
         group: ubuntu
 
-    - name: Setup API venv
+    - name: Build S3 enabled pysam in API venv
+      ansible.builtin.pip:
+        name: 
+          - pysam
+        virtualenv: "{{inst_dir}}/api/venv"
+        state: present
+        extra_args: "--no-binary pysam"
+      environment:
+        HTSLIB_CONFIGURE_OPTIONS: "--enable-libcurl --enable-s3"
+
+    - name: Install Bravo API and dependencies into API venv
       ansible.builtin.pip:
         name:
           - "git+https://github.com/statgen/bravo_api.git"
@@ -168,8 +166,41 @@
   tags:
     - instance
     - systemd
+  # From https://www.jeffgeerling.com/blog/2017/quick-way-check-if-youre-aws-ansible-playbook
+  pre_tasks:
+    - name: Check if inside AWS.
+      uri:
+        url: http://169.254.169.254/latest/meta-data
+        timeout: 2
+      register: aws_uri_check
+      failed_when: False
+
+    - set_fact:
+        is_aws_environment: "{{ aws_uri_check.status == 200 }}"
   tasks:
-    - name: Create systemd service for API
+    - name: Script for HTSLIB S3 credentials
+      ansible.builtin.template:
+        mode: 0755
+        dest: /usr/local/sbin/hts_credentials.sh
+        src: templates/hts_credentials.sh.j2
+      when: is_aws_environment
+
+    - name: Systemd service for HTSLIB S3 credentials
+      ansible.builtin.template:
+        mode: 0755
+        dest: /etc/systemd/system/hts-credentials.service
+        src: templates/hts-credentials.service.j2
+      when: is_aws_environment
+
+    - name: Start credentials service
+      ansible.builtin.systemd:
+        daemon_reload: yes
+        name: hts-credentials.service
+        enabled: yes
+        state: restarted
+      when: is_aws_environment
+
+    - name: Systemd service for API
       ansible.builtin.template:
         mode: 0755
         dest: /etc/systemd/system/bravo-api.service
@@ -179,7 +210,6 @@
       ansible.builtin.systemd:
         name: bravo-api.service
         state: restarted
-
 
 - hosts: mongo
   become: yes
