@@ -9,7 +9,7 @@ GZIP_COMPRESSION = True
 BASE_DIR = "{{base_dir}}/data"
 
 # directory or s3 coverage_url with coverage files
-{% if covrage_url is defined and coverage_url|length %}
+{% if coverage_url is defined and coverage_url|length %}
 COVERAGE_DIR = "{{coverage_url}}"
 {% else %}
 COVERAGE_DIR = "{{base_dir}}/data/runtime/coverage/"
