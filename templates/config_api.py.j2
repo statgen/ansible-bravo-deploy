@@ -17,7 +17,13 @@ COVERAGE_DIR = "{{base_dir}}/data/runtime/coverage/"
 
 # directory containing variant map and sequences/ dir
 #  Contained sequences dir expected to have with CRAM files
-SEQUENCES_DIR = "s3://{{data_bucket}}/runtime/crams/"
+
+# directory or s3 with cram files
+{% if sequences_url is defined and sequences_url|length %}
+SEQUENCES_DIR = "{{sequences_url}}"
+{% else %}
+SEQUENCES_DIR = "{{base_dir}}/data/runtime/crams/"
+{% endif %}
 
 # directory for the runtime cached BAM/CRAM files
 SEQUENCES_CACHE_DIR = "{{base_dir}}/data/runtime/cache/"

@@ -14,8 +14,25 @@ Three roles:
     ```
 - ssh keys to use to access the EC2 instances: [key-pair docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#prepare-key-pair)
 
-### Optional Dependency
-Data for staging deployment may be downloaded from an S3 bucket
+### Optional S3 Dependency for Data Loading
+Data for staging deployment may be downloaded from an S3 bucket to disk.
+It can then be subsequently loaded into mongo.
+
+This is a convenience for smaller data sets like the staging data.
+It is not suitable for large data sets such as the production data.
+
+### Optional S3 Runtime Dependency
+Subsets of the coverage and crams data can be retrieved from S3 at runtime to save on disk space.
+This requires a build of HTSLIB that supports the libcurl and s3 plugins.
+
+In order to use S3 as the backing data for crams or coverage, the corresponding variable needs to be defined for the application host or group variables.
+E.g. in `group_vars/bravo_staging/dirs.yml`:
+
+```yml
+---
+coverage_url: "s3://example-bucket/runtime/coverage"
+sequences_url: "s3://example-bucket/runtime/crams"
+```
 
 ## Data Loading
 The data loading step is time consuming.
