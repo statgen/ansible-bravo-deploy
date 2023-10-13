@@ -1,6 +1,8 @@
 ---
 # S3 bucket in which the backing data is stored
 data_bucket: "bravo-staging-data"
+coverage_url: "s3://bravo-staging-data/runtime/coverage"
+sequences_url: "s3://bravo-staging-data/runtime/crams"
 
 # Prefix containing the basis and runtime prefixs (directories)
 data_key: ""

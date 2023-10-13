@@ -1,6 +1,8 @@
 ---
 # S3 bucket in which the backing data is stored
 data_bucket: "bravo-freeze10"
+coverage_url: "s3://bravo-freeze10/runtime/coverage"
+sequences_url: "s3://bravo-freeze10/runtime/crams"
 
 # Top level key prefix containing the basis and runtime prefixs (directories)
 data_key: ""
@@ -8,3 +10,4 @@ data_key: ""
 # Flag determining if data download and load is run.
 #   Defaults to false.  Use -e "load_data=true" to run data tasks.
 load_data: false
+

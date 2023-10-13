@@ -2,4 +2,3 @@
 base_dir: "/bravo"
 code_dir: "{{base_dir}}/src"
 inst_dir: "{{base_dir}}/instance"
-coverage_url: "s3://bravo-staging-data/runtime/coverage"
