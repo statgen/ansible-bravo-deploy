@@ -18,8 +18,6 @@
       reboot:
       when: reboot_required.stat.exists
 
-
-
 - hosts: app
   become: yes
   tags:
@@ -263,15 +261,27 @@
   tags:
     - data
   tasks:
-    - name: Data Loading Condition
-      ansible.builtin.debug:
-        msg: "Data loading skipped because load_data = no"
-      when: not load_data
-
-    - name: Download and Load Data
+    - name: Download runtime data and load basis data into mongo
       ansible.builtin.include_role:
         name: data_loading
       when: load_data
+
+    - name: Create runtime reference directory
+      ansible.builtin.file:
+        path: "{{base_dir}}/data/runtime/reference"
+        state: "directory"
+
+    - name: Download runtime reference fasta from S3
+      amazon.aws.s3_object:
+        bucket: "{{data_bucket}}"
+        object: "runtime/reference/{{item}}"
+        mode: "get"
+        overwrite: "latest"
+        dest: "{{base_dir}}/data/runtime/reference/{{item}}"
+      loop:
+        - "hs38DH.fa"
+        - "hs38DH.fa.fai"
+      when: data_bucket | length > 0
 
 - hosts: mongo
   tags:
