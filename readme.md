@@ -82,7 +82,14 @@ should be specified since `do_download` is false by default.
 
 ```sh
 ansible-playbook --ssh-common-args='-F inv/ssh-config' \
-  -i 'inv/servers' playbook.yml -e ' load_data=true'
+  -i 'inv/servers' playbook.yml -e 'load_data=true'
+```
+
+### Deploy from specific git branch
+To deploy from a specific reference on github, specify the `bravo_ref` variable (default value is "main").
+```sh
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' playbook.yml -e 'bravo_ref=example'
 ```
 
 ### Only redeploy the python application:

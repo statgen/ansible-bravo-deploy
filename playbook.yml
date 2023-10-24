@@ -125,6 +125,7 @@
   vars:
     mongo_host: "{{ groups['mongo'] | first }}"
     mongo_ip: "{{ hostvars[mongo_host]['private_ip'] }}"
+    bravo_ref: "main"
   tasks:
     - name: Create API instance dir
       ansible.builtin.file:
@@ -146,7 +147,7 @@
     - name: Install Bravo API and dependencies into API venv
       ansible.builtin.pip:
         name:
-          - "git+https://github.com/statgen/bravo_api.git"
+          - "git+https://github.com/statgen/bravo_api.git@{{bravo_ref}}"
           - gunicorn
           - gevent
         virtualenv: "{{inst_dir}}/api/venv"
