@@ -257,6 +257,7 @@
       ansible.builtin.systemd:
         name: mongod.service
         state: restarted
+        enabled: true
 
 - hosts: app
   tags:
