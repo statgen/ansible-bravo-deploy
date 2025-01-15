@@ -1,4 +1,6 @@
 ---
+# This download all task assumes the structure under the key in the data bucket
+# matches the runtime expectations of the BRAVO API application.
 - name: Enumerate keys in bucket.
   amazon.aws.aws_s3:
     bucket: "{{data_bucket}}"
