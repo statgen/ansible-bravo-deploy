@@ -99,14 +99,14 @@
       become: yes
       ansible.builtin.filesystem:
         dev: /dev/nvme1n1
-        fstype: ext4
+        fstype: xfs
 
     - name: Mount ebs volume
       become: yes
       ansible.posix.mount:
         src: /dev/nvme1n1
         path: "{{base_dir}}"
-        fstype: ext4
+        fstype: xfs
         state: mounted
 
     - name: Set owner of mount point
@@ -218,7 +218,7 @@
   roles:
     - role: community.mongodb.mongodb_repository
       vars:
-        mongodb_version: "4.4"
+        mongodb_version: "7.0"
     - role: community.mongodb.mongodb_install
 
 
