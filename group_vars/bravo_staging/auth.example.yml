@@ -3,3 +3,4 @@
 # Rename file to auth.yml, uncomment lines, fill in your project's values.
 #gauth_client_id: "012345678910-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com"
 #gauth_client_secret: "EXAMPL-1-ABCD_efghijk12345678910x_z"
+#user_domain_permitted: "example.com"

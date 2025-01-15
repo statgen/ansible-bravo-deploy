@@ -45,3 +45,8 @@ CORS_ORIGINS = {{cors_origins}}
 GOOGLE_CLIENT_ID = "{{gauth_client_id | default('')}}"
 GOOGLE_CLIENT_SECRET = "{{gauth_client_secret | default('')}}"
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+# Config for limiting user access to users from a single domain
+{% if sequences_url is defined and sequences_url|length %}
+USER_DOMAIN_PERMITTED = "{{user_domain_permitted | default('')}}"
+{% endif %}
