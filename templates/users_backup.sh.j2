@@ -1,0 +1,14 @@
+#!/usr/bin/bash
+
+# Backup users data script to be executed on the mongodb host.
+# Write data directly to S3 without making local copy on disk.
+# May miss writes in progress at time of backup.
+
+# Set TODAY in yyyy-mm-dd format
+printf -v TODAY '%(%Y-%m-%d)T' -1
+
+USERS_DEST=s3://{{data_bucket}}/backup/users.${TODAY}.gz
+AUTH_LOG_DEST=s3://{{data_bucket}}/backup/auth_log.${TODAY}.gz
+
+mongodump --db=bravo --collection=auth_log --archive --gzip | aws s3 cp - ${AUTH_LOG_DEST}
+mongodump --db=bravo --collection=users --archive --gzip | aws s3 cp - ${USERS_DEST}
