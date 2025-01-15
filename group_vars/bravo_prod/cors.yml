@@ -2,4 +2,4 @@
 # prod cors
 cors_origins:
   - 'https://genome-bravo.org'
-  - 'https://bravobeta.sph.umich.edu'
+  - 'https://bravo.sph.umich.edu'
