@@ -106,3 +106,13 @@ Updates the machine, installs dependencies, installs application.
 ansible-playbook --ssh-common-args='-F inv/ssh-config' -i 'inv/servers' playbook.yml
 ```
 
+## Troubleshooting
+
+### Unable to connect to app or db instance via ssh
+After provisioning the infrastructure again, the application and bastion hosts will have changed but the private ips are static.
+As such, the ssh known hosts will be in conflict. You may have remove the entries in your known hosts file and accept the new fingerprints when prompted.  The IPs should be listed in inv/servers.
+
+```sh
+ssh-keygen -f "~/.ssh/known_hosts" -R "10.0.101.14"
+```
+
