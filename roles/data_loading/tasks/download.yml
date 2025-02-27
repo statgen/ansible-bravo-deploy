@@ -2,7 +2,7 @@
 # This download all task assumes the structure under the key in the data bucket
 # matches the runtime expectations of the BRAVO API application.
 - name: Enumerate keys in bucket.
-  amazon.aws.aws_s3:
+  amazon.aws.s3_object:
     bucket: "{{data_bucket}}"
     prefix: "{{data_key}}"
     mode: list
@@ -14,8 +14,10 @@
   when: data_key | length > 0
 
 - name: Convenience list of paths relative bucket root
+  vars:
+    cram_regex: '\.cram'
   ansible.builtin.set_fact:
-    rel_paths: "{{ s3list.s3_keys }}"
+    rel_paths: "{{ s3list.s3_keys | reject('regex', cram_regex) }}"
   when: data_key | length == 0
 
 - name: Create data subdirectories
@@ -25,10 +27,16 @@
   loop: "{{rel_paths | map('dirname') | unique}}"
 
 - name: Get files from bucket.
-  amazon.aws.aws_s3:
+  amazon.aws.s3_object:
     bucket: "{{data_bucket}}"
     object: "{{data_key}}/{{item}}"
     dest:   "{{(data_dir, item) | path_join}}"
     mode: get
     overwrite: never
   loop: "{{rel_paths}}"
+
+- name: Make data directory readable
+  ansible.builtin.file:
+    path: "{{data_dir}}"
+    mode: "0775"
+    recurse: true

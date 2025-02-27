@@ -12,3 +12,4 @@ bravo_env:
   FLASK_APP: bravo_api
   BRAVO_API_CONFIG_FILE: config.py
   BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
+  AWS_SHARED_CREDENTIALS_FILE: "{{inst_dir}}/credentials"

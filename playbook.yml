@@ -288,6 +288,7 @@
 - hosts: mongo
   tags:
     - data
+    - eqtl
   tasks:
     - name: Create import script
       ansible.builtin.template:
