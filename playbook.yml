@@ -305,6 +305,16 @@
           ansible.builtin.debug:
             msg: "Eqtl import did not complete successfully"
 
+    - name: Copy eqtl indexing script
+      ansible.builtin.copy:
+        mode: 0775
+        dest: /tmp/eqtl_index.js
+        src: files/eqtl_index.js
+
+    - name: Run eqtl indexing script
+      ansible.builtin.command:
+        cmd: "mongosh -f /tmp/eqtl_index.js bravo"
+
 - hosts: app
   become: yes
   gather_facts: no
