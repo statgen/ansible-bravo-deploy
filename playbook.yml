@@ -304,6 +304,7 @@
         - name: Report eqtl import failure
           ansible.builtin.debug:
             msg: "Eqtl import did not complete successfully"
+      when: load_data
 
     - name: Copy eqtl indexing script
       ansible.builtin.copy:
@@ -314,6 +315,7 @@
     - name: Run eqtl indexing script
       ansible.builtin.command:
         cmd: "mongosh -f /tmp/eqtl_index.js bravo"
+      when: load_data
 
 - hosts: app
   become: yes
