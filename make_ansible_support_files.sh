@@ -84,7 +84,7 @@ site_bucket=${SITE_BUCKET}
 ${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP}
 
 [mongo]
-${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP}
+${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP} fs_type=xfs
 
 [${ANSIBLE_GROUP_NAME}:children]
 bastion

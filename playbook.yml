@@ -93,13 +93,18 @@
         path: "{{base_dir}}"
         state: directory
 
+    - name: Pick filesystem type
+      ansible.builtin.set_fact:
+        fs_type: ext4
+      when: fs_type is undefined
+
     # Could use ebsnvme-id from https://github.com/amazonlinux/amazon-ec2-utils
     #   to create symlinks that use the original volume name
     - name: Format ebs volume
       become: yes
-      ansible.builtin.filesystem:
+      community.general.filesystem:
         dev: /dev/nvme1n1
-        fstype: xfs
+        fstype: "{{fs_type}}"
 
     - name: Mount ebs volume
       become: yes
