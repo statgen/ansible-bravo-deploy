@@ -4,7 +4,7 @@
 #  - ssh config
 #  - ansible inventory
 
-# Get workspace name from env or use default
+# Get terraform cloud workspace name from env or use default
 WORKSPACE_NAME="${WORKSPACE_NAME:=bravo_staging}"
 
 # Ansible group names can't have -, substitute _
