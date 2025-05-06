@@ -7,7 +7,7 @@ let pheno_idx   = {'phenotype_id': 1}
 let var_idx     = {'variant_id': 1}
 let credset_idx = {'tissue': 1, 'phenotype_id': 1, 'cs_id': 1}
 
-db.eqtl_susie.createIndex(cpra_idx)
-db.eqtl_susie.createIndex(pheno_idx)
-db.eqtl_susie.createIndex(var_idx)
-db.eqtl_susie.createIndex(credset_idx, {'name': 'credset_idx'})
+db.{{collection_name}}.createIndex(cpra_idx)
+db.{{collection_name}}.createIndex(pheno_idx)
+db.{{collection_name}}.createIndex(var_idx)
+db.{{collection_name}}.createIndex(credset_idx, {'name': 'credset_idx'})

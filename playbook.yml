@@ -268,9 +268,9 @@
   tags:
     - data
   tasks:
-    - name: Download runtime data and load basis data into mongo
+    - name: Download core runtime data and load basis data into mongo
       ansible.builtin.include_role:
-        name: data_loading
+        name: core_data
       when: load_data
 
     - name: Create runtime reference directory

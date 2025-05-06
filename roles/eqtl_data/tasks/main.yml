@@ -1,0 +1,6 @@
+---
+- name: Import eqtl data into mongodb from S3
+  import_tasks: import_eqtl.yml
+
+- name: Merge eqtl data into snv collection
+  import_tasks: merge_eqtl.yml

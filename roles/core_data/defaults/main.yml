@@ -3,7 +3,7 @@ base_dir: "/bravo"
 data_dir: "{{base_dir}}/data"
 inst_dir: "{{base_dir}}/instance"
 
-# Debugging control to do downloading or data loading only
+# Control to do downloading or data loading only
 do_download: false
 do_loading: true
 

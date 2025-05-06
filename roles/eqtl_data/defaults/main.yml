@@ -1,0 +1,6 @@
+---
+db_name: "bravo"
+collection_name: "eqtl_susie"
+
+data_bucket: ""
+eqtl_key: "basis/eqtl/all.susie.tsv"
