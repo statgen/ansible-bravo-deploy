@@ -233,6 +233,13 @@
     - database
     - dependencies
   tasks:
+    - name: Alter group owner of base_dir
+      ansible.builtin.file:
+        path: "{{base_dir}}"
+        state: directory
+        group: mongodb
+        mode: "0775"
+
     - name: Create mongo db directory
       ansible.builtin.file:
         path: "{{base_dir}}/mongodata"

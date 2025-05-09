@@ -52,5 +52,6 @@ db.snv.aggregate(pipeline)
 /***************************************
 * Write Lockfile Indicating Completion *
 ***************************************/
+const fs = require('fs')
 let completionTime = new Date()
-writeFile("{{base_dir}}/eqtl_merge.lock", completionTime.toString())
+fs.writeFileSync("{{base_dir}}/eqtl_merge.lock", completionTime.toString())
