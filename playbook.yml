@@ -295,31 +295,9 @@
     - data
     - eqtl
   tasks:
-    - name: Create import script
-      ansible.builtin.template:
-        mode: 0775
-        dest: "/tmp/eqtl_import.sh"
-        src: templates/eqtl_import.sh.j2
-
-    - name: Import eqtl data
-      block:
-        - name: Run eqtl import script
-          command: /tmp/eqtl_import.sh
-      rescue:
-        - name: Report eqtl import failure
-          ansible.builtin.debug:
-            msg: "Eqtl import did not complete successfully"
-      when: load_data
-
-    - name: Copy eqtl indexing script
-      ansible.builtin.copy:
-        mode: 0775
-        dest: /tmp/eqtl_index.js
-        src: files/eqtl_index.js
-
-    - name: Run eqtl indexing script
-      ansible.builtin.command:
-        cmd: "mongosh -f /tmp/eqtl_index.js bravo"
+    - name: Load and integrate eqtl data
+      ansible.builtin.include_role:
+        name: eqtl_data
       when: load_data
 
 - hosts: app

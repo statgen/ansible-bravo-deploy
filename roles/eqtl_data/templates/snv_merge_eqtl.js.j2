@@ -1,27 +1,27 @@
 /* Merging an indicator of which SNVs also appear in the eQTL collection. 
  *   Facilitates the display and highlighting of which snvs are also eqtls.
  *   BRAVO database needs to be specified at the command line.
+ *
+ * Writes a .lock file to indicate that merge has been run.
  */
 
 
 /***************
 * Safety Check *
 ***************/
-let eqtlName = "eqtl_susie"
-
-if(!db.getCollectionNames().includes(eqtlName)){
-  console.error(`In DB, ${db.getName()}, did NOT find collection ${eqtlName}.`)
+if(!db.getCollectionNames().includes("{{collection_name}}")){
+  console.error(`In DB, ${db.getName()}, did NOT find collection {{collection_name}}.`)
   quit(1)
 }
 
-console.log(`In DB, ${db.getName()}, found collection ${eqtlName}.`)
+console.log(`In DB, ${db.getName()}, found collection {{collection_name}}.`)
 
 /*****************************
 * Index to facilitate lookup *
 *****************************/
 console.log("creating indexes")
 db.snv.createIndex({variant_id: 1})
-db.eqtl_susie.createIndex({variant_id: 1})
+db.{{collection_name}}.createIndex({variant_id: 1})
 
 /*************************
 * Define Update Pipeline *
@@ -30,7 +30,7 @@ db.eqtl_susie.createIndex({variant_id: 1})
 let pProjectInit = {$project: {variant_id: 1}}
 
 // look up corresponding eqtl documents
-let pLookup = {$lookup: {from: "eqtl_susie", localField: "variant_id", foreignField: "variant_id", as: "eqtls"}}
+let pLookup = {$lookup: {from: "{{collection_name}}", localField: "variant_id", foreignField: "variant_id", as: "eqtls"}}
 
 // match only snvs that have eqtls
 let pMatch  = {$match: {"eqtls": {$ne: []}}}
@@ -47,4 +47,10 @@ let pipeline = [pProjectInit, pLookup, pMatch, pProjectFinal, pMerge]
 /*************************
 * Execute Update Pipeline *
 *************************/
-let result = db.snv.aggregate(pipeline)
+db.snv.aggregate(pipeline)
+
+/***************************************
+* Write Lockfile Indicating Completion *
+***************************************/
+let completionTime = new Date()
+writeFile("{{base_dir}}/eqtl_merge.lock", completionTime.toString())

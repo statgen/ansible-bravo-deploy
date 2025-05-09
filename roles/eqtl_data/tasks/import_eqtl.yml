@@ -1,26 +1,34 @@
 ---
-tasks:
-  - name: Create import script
-    ansible.builtin.template:
-      mode: 0775
-      dest: "/tmp/eqtl_import.sh"
-      src: templates/eqtl_import.sh.j2
+- name: Create import script
+  ansible.builtin.template:
+    mode: 0775
+    dest: "/tmp/eqtl_import.sh"
+    src: templates/eqtl_import.sh.j2
 
-    - name: Import eqtl data
-      block:
-        - name: Run eqtl import script
-          command: /tmp/eqtl_import.sh
-      rescue:
-        - name: Report eqtl import failure
-          ansible.builtin.debug:
-            msg: "Eqtl import did not complete successfully"
-
-    - name: Copy eqtl indexing script
-      ansible.builtin.template:
-        mode: 0775
-        dest: /tmp/eqtl_index.js
-        src: files/eqtl_index.js.j2
-
-    - name: Run eqtl indexing script
+- name: Import eqtl data
+  block:
+    - name: Run eqtl import script
       ansible.builtin.command:
-        cmd: "mongosh -f /tmp/eqtl_index.js bravo"
+        cmd: /tmp/eqtl_import.sh
+        creates: "{{base_dir}}/eqtl_import.lock"
+      register: eqtl_result
+
+    - name: Eqtl loading lock file
+      ansible.builtin.file:
+        path: "{{base_dir}}/eqtl_import.lock"
+        state: touch
+      when: eqtl_result is succeeded and not eqtl_result is skipped
+  rescue:
+    - name: Report eqtl import failure
+      ansible.builtin.debug:
+        msg: "Eqtl import did not complete successfully"
+
+- name: Copy eqtl indexing script
+  ansible.builtin.template:
+    mode: 0775
+    dest: /tmp/eqtl_index.js
+    src: templates/eqtl_index.js.j2
+
+- name: Run eqtl indexing script
+  ansible.builtin.command:
+    cmd: "mongosh -f /tmp/eqtl_index.js bravo"

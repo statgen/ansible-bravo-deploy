@@ -1,11 +1,19 @@
 ---
-tasks:
-  - name: Create eqtl to snv merge script
-    ansible.builtin.template:
-      mode: 0775
-      dest: "/tmp/snv_merge_eqtl.js"
-      src: templates/snv_merge_eqtl.js.j2
+- name: Create eqtl to snv merge script
+  ansible.builtin.template:
+    mode: 0775
+    dest: "/tmp/snv_merge_eqtl.js"
+    src: templates/snv_merge_eqtl.js.j2
 
-    - name: Run eqtl merge script
-      ansible.builtin.command:
-        cmd: "mongosh -f /tmp/snv_merge_eqtl.js {{db_name}}"
+- name: Run eqtl merge script
+  ansible.builtin.command:
+    cmd: "mongosh -f /tmp/snv_merge_eqtl.js {{db_name}}"
+    creates: "{{base_dir}}/eqtl_merge.lock"
+  async: 86400
+  poll: 0
+  register: merge_job
+
+- name: Clean up async merge job
+  ansible.builtin.async_status:
+    jid: "{{merge_job.ansible_job_id}}"
+    mode: cleanup
