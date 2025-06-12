@@ -92,6 +92,13 @@ ansible-playbook --ssh-common-args='-F inv/ssh-config' \
   -i 'inv/servers' playbook.yml -e 'bravo_ref=example'
 ```
 
+### Deploy application only from specific git branch
+To deploy from a specific reference on github, specify the `bravo_ref` variable (default value is "main").
+```sh
+ansible-playbook --ssh-common-args='-F inv/ssh-config' \
+  -i 'inv/servers' --tags instance playbook.yml -e 'bravo_ref=example'
+```
+
 ### Only redeploy the python application:
 Only update the API and restart the systemd service running it.
 ```
