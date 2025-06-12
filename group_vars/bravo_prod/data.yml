@@ -3,6 +3,7 @@
 data_bucket: "bravo-freeze10"
 coverage_url: "s3://bravo-freeze10/runtime/coverage"
 sequences_url: "s3://bravo-freeze10/runtime/crams"
+pubvcfs_url: "s3://bravo-freeze10/runtime/public-vcfs"
 
 # Top level key prefix containing the basis and runtime prefixs (directories)
 data_key: ""
