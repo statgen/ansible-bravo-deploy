@@ -1,0 +1,8 @@
+[Unit]
+Before=bravo.mount
+After=boot.mount
+Description=Create EnvironmentFile for bravo.mount
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/gen_ebs_mount_env.sh

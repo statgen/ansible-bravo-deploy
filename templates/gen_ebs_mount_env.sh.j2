@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+OUTFILE=${1:-"/usr/local/etc/bravo_mount_env"}
+EBS_VOL_ID="{{ebs_vol_id}}"
+TR_VOL_ID=`echo $EBS_VOL_ID | tr -d '-'`
+
+EBS_DEV_NAME=$(\
+  lsblk -J -o +SERIAL |\
+    jq --arg vol_id "$TR_VOL_ID" \
+      '.blockdevices[] | select(.serial == $vol_id).name' |\
+    tr -d '"' )
+
+
+# Wrtie to stdout for Anisble playbook device name discovery
+echo "/dev/${EBS_DEV_NAME}"
+
+# Write to environment file for bravo mounting systemd unit
+echo "BRAVO_EBS_DEVICE=/dev/${EBS_DEV_NAME}" > "${OUTFILE}"

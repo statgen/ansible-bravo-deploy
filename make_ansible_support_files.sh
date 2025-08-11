@@ -38,6 +38,8 @@ PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip[0]')
 DB_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.db_server_private_ip')
+EBS_APP_VOL_ID=$(echo "${TERRAFORM_JSON}" | jq -r '.app_data_ebs_vol_id')
+
 
 echo "Terraform workspace data:"
 echo "${TERRAFORM_JSON}"
@@ -81,10 +83,10 @@ ${PET_NAME}-bastion
 site_bucket=${SITE_BUCKET}
 
 [app]
-${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP}
+${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP} ebs_vol_id=${EBS_APP_VOL_ID}
 
 [mongo]
-${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP} fs_type=xfs
+${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP} fs_type=xfs ebs_vol_id=${EBS_APP_VOL_ID}
 
 [${ANSIBLE_GROUP_NAME}:children]
 bastion

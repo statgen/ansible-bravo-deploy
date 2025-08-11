@@ -1,0 +1,11 @@
+[Unit]
+Before=local-fs.target
+After=boot.mount bravo-ebs-discovery.service
+
+[Mount]
+EnvironmentFile=/usr/local/etc/bravo_mount_env
+
+What=$BRAVO_EBS_DEVICE
+Where=/bravo
+Type={{fs_type}}
+
