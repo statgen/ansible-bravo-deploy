@@ -2,7 +2,7 @@
 Description=BRAVO API
 {% if is_aws_environment %}
 Wants=hts-credentials.service
-After=hts-credentials.service
+After=hts-credentials.service bravo.mount
 {% endif %}
 
 [Service]
@@ -17,7 +17,7 @@ Environment="FLASK_APP=bravo_api"
 Environment="BRAVO_API_CONFIG_FILE=config.py"
 Environment="BRAVO_API_INSTANCE_DIR={{inst_dir}}/api"
 {% if is_aws_environment %}
-Environment="AWS_SHARED_CREDENTIALS_FILE={{inst_dir}}/credentials"
+Environment="HTS_S3CFG_FILE={{inst_dir}}/s3cfg"
 {% endif %}
 
 RuntimeDirectory=bravo-api

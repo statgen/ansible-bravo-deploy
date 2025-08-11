@@ -74,50 +74,101 @@
         cmd: /tmp/aws/install
         creates: /usr/local/bin/aws
 
+# Mount EBS volume holding the Application & Data
 - hosts: "app:mongo"
   tags:
     - setup
   tasks:
-    - name: Create base directory mount point
+    - name: Set default value for filesystem type of data volume
+      ansible.builtin.set_fact:
+        fs_type: xfs
+      when: fs_type is undefined
+
+    - name: Copy EBS device name resolution script
+      become: yes
+      ansible.builtin.template:
+        mode: 0755
+        dest: /usr/local/bin/gen_ebs_mount_env.sh
+        src: templates/gen_ebs_mount_env.sh.j2
+
+    - name: Copy systemd name resolution service
+      become: yes
+      ansible.builtin.template:
+        mode: 0555
+        dest: /etc/systemd/system/bravo-ebs-discovery.service
+        src: templates/bravo-ebs-discovery.service.j2
+
+    - name: Copy bravo systemd mount file
+      become: yes
+      ansible.builtin.template:
+        mode: 0555
+        dest: /etc/systemd/system/bravo.mount
+        src: templates/bravo.mount.j2
+
+    - name: Resolve EBS block device name
+      ansible.builtin.command: "/usr/local/bin/gen_ebs_mount_env.sh '/dev/null'"
+      register: blk_device_result
+
+    - name: Create base directory of mount point
       become: yes
       ansible.builtin.file:
         path: "{{base_dir}}"
         state: directory
 
-    - name: Pick filesystem type for data volume
-      ansible.builtin.set_fact:
-        fs_type: xfs
-      when: fs_type is undefined
-
     - name: Query block device format 
-      ansible.builtin.command: "lsblk --noheadings --output FSTYPE /dev/nvme1n1"
+      ansible.builtin.command: "lsblk --noheadings --output FSTYPE {{blk_device_result.stdout}}"
       register: blk_fstype
 
-    # Could use ebsnvme-id from https://github.com/amazonlinux/amazon-ec2-utils
-    #   to create symlinks that use the original volume name
     # Format volume when it does not match the expected type.
     - name: Format ebs data filesystem
       become: yes
       community.general.filesystem:
-        dev: /dev/nvme1n1
+        dev: "{{blk_device_result.stdout}}"
         fstype: "{{fs_type}}"
       when: blk_fstype.stdout_lines[0] != fs_type
 
-    - name: Mount ebs data filesystem
+    - name: Reload systemd daemon to pick up ebs mounting services
       become: yes
-      ansible.posix.mount:
-        src: /dev/nvme1n1
-        path: "{{base_dir}}"
-        fstype: "{{fs_type}}"
-        state: mounted
+      ansible.builtin.systemd_service:
+        daemon_reload: true
 
-    - name: Set owner of mount point
+    - name: Start EBS device name discovery service
+      become: yes
+      ansible.builtin.systemd_service:
+        name: "bravo-ebs-discovery.service"
+        enabled: true
+        state: "started"
+
+    - name: Start EBS mount
+      become: yes
+      ansible.builtin.systemd_service:
+        name: "bravo.mount"
+        enabled: true
+        state: "started"
+
+    - name: Start EBS mount
+      become: yes
+      ansible.builtin.systemd_service:
+        name: "bravo.mount"
+        enabled: true
+        state: "started"
+
+    # - name: Mount ebs data filesystem
+    #   become: yes
+    #   ansible.posix.mount:
+    #     src: /dev/nvme1n1
+    #     path: "{{base_dir}}"
+    #     fstype: "{{fs_type}}"
+    #     state: mounted
+
+    - name: Update owner of mounted directory
       become: yes
       ansible.builtin.file:
         path: "{{base_dir}}"
         state: directory
         owner: "{{ansible_user_id}}"
         group: "{{ansible_user_id}}"
+
 
 
 - hosts: app
@@ -199,18 +250,10 @@
     - set_fact:
         is_aws_environment: "{{ aws_uri_check.status == 200 }}"
 
-    - name: debug is_aws content
-      ansible.builtin.debug:
-        msg: "{{is_aws_environment}}"
-
-
-    - name: debug running on aws
-      ansible.builtin.debug:
-        var: aws_uri_check
-
-    - name: debug running on aws
-      ansible.builtin.debug:
-        var: is_aws_environment
+    - name: Remove legacy credentials file
+      ansible.builtin.file:
+        path: "{{inst_dir}}/credentials"
+        state: absent
 
     - name: Script for HTSLIB S3 credentials
       ansible.builtin.template:
