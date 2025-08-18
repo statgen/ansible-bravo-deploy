@@ -7,12 +7,57 @@ Three roles:
 
 ## Dependencies
 - AWS Credentials configured locally.
-- [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) 
+- [Ansible installed](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 - Requires Ansible collection community.mongodb
     ```
     ansible-galaxy collection install -r requirements.yml
     ```
 - ssh keys to use to access the EC2 instances: [key-pair docs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html#prepare-key-pair)
+- Configuration details to build ansible inventory (inv/servers) e.g.:
+    ```ini
+    [bastion]
+    bravo-example-bastion
+
+    [app]
+    bravo-example-app data_bucket=bravo-staging-data private_ip=10.0.101.123 ebs_vol_id=vol-fedcba98765432111
+
+    [mongo]
+    bravo-example-db private_ip=10.0.101.125 fs_type=xfs ebs_vol_id=vol-123456789abcdefff
+
+    [bravo_staging:children]
+    bastion
+    app
+    mongo
+    ```
+
+- Configuration details to build ssh-config e.g.:
+    ```txt
+    Host bravo-example-bastion
+      User ec2-user
+      Hostname 192.0.2.1
+      TCPKeepAlive yes
+      ServerAliveInterval 240
+      Port 22
+
+    Host bravo-example-app
+      User ubuntu
+      Hostname 10.0.101.123
+      ProxyJump bravo-example-bastion
+      TCPKeepAlive yes
+      ServerAliveInterval 240
+      Port 22
+
+    Host bravo-example-db
+      User ubuntu
+      Hostname 10.0.101.125
+      ProxyJump awake-glider-bastion
+      TCPKeepAlive yes
+      ServerAliveInterval 240
+      Port 22
+    ```
+
+## Configuration
+Configuration is read from the terraform state corresponding to the deployment (staging or prod).  The `make_ansible_support_files.sh` script handles connecting to the terraform cloud workspace and retrieving the terraform outputs.  It then transforms that data into an ansible inventory (inv/servers) and an ssh config (inv/ssh-config).
 
 ### Optional S3 Dependency for Data Loading
 Data for staging deployment may be downloaded from an S3 bucket to disk.
@@ -77,7 +122,7 @@ ansible-playbook --ssh-common-args='-F inv/ssh-config' \
 ```
 
 ### Full deployment with data loading (no bucket download)
-To load the data only for the cases where it's already in place on disk, only `load_data=true` 
+To load the data only for the cases where it's already in place on disk, only `load_data=true`
 should be specified since `do_download` is false by default.
 
 ```sh

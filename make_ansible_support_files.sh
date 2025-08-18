@@ -10,7 +10,7 @@ WORKSPACE_NAME="${WORKSPACE_NAME:=bravo_staging}"
 # Ansible group names can't have -, substitute _
 ANSIBLE_GROUP_NAME=$(echo "${WORKSPACE_NAME}" | tr '-' '_')
 
-# Get terraform cloud token from credentials file 
+# Get terraform cloud token from credentials file
 JQ_EXP='."credentials"."app.terraform.io"."token"'
 TOKEN=$(jq -r ${JQ_EXP} < ~/.terraform.d/credentials.tfrc.json)
 
@@ -23,7 +23,7 @@ WORKSPACE_ID=$(curl -s \
   jq -r '.data[0].id')
 
 # Get json output from terraform workspace outputs
-#   Munge to similar format as terraform output -json  
+#   Munge to similar format as terraform output -json
 URL_OUTS="https://app.terraform.io/api/v2/workspaces/$WORKSPACE_ID/current-state-version?include=outputs"
 TERRAFORM_JSON=$(curl -s \
   --header "Authorization: Bearer $TOKEN" \
@@ -33,12 +33,12 @@ TERRAFORM_JSON=$(curl -s \
 
 # Parse json into env variables
 BUCKET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.bucket_name')
-SITE_BUCKET=$(echo "${TERRAFORM_JSON}" | jq -r '.static_site_bucket')
 PET_NAME=$(echo "${TERRAFORM_JSON}" | jq -r '.pet_name')
 BASTION_PUBLIC_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.bastion_public_ip')
 APP_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.app_server_private_ip[0]')
 DB_SERVER_PRIVATE_IP=$(echo "${TERRAFORM_JSON}" | jq -r '.db_server_private_ip')
 EBS_APP_VOL_ID=$(echo "${TERRAFORM_JSON}" | jq -r '.app_data_ebs_vol_id')
+EBS_DB_VOL_ID=$(echo "${TERRAFORM_JSON}" | jq -r '.db_data_ebs_vol_id')
 
 
 echo "Terraform workspace data:"
@@ -80,13 +80,12 @@ echo "Writing inventory: inv/servers"
 cat << INVENTORYDOC > inv/servers
 [bastion]
 ${PET_NAME}-bastion
-site_bucket=${SITE_BUCKET}
 
 [app]
 ${PET_NAME}-app data_bucket=${BUCKET_NAME} private_ip=${APP_SERVER_PRIVATE_IP} ebs_vol_id=${EBS_APP_VOL_ID}
 
 [mongo]
-${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP} fs_type=xfs ebs_vol_id=${EBS_APP_VOL_ID}
+${PET_NAME}-db private_ip=${DB_SERVER_PRIVATE_IP} fs_type=xfs ebs_vol_id=${EBS_DB_VOL_ID}
 
 [${ANSIBLE_GROUP_NAME}:children]
 bastion
