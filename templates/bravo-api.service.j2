@@ -17,7 +17,7 @@ Environment="FLASK_APP=bravo_api"
 Environment="BRAVO_API_CONFIG_FILE=config.py"
 Environment="BRAVO_API_INSTANCE_DIR={{inst_dir}}/api"
 {% if is_aws_environment %}
-Environment="HTS_S3CFG_FILE={{inst_dir}}/s3cfg"
+Environment="HTS_S3_S3CFG={{inst_dir}}/s3cfg"
 {% endif %}
 
 RuntimeDirectory=bravo-api

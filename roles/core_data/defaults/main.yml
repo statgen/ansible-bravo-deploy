@@ -12,4 +12,4 @@ bravo_env:
   FLASK_APP: bravo_api
   BRAVO_API_CONFIG_FILE: config.py
   BRAVO_API_INSTANCE_DIR: "{{inst_dir}}/api"
-  HTS_S3CFG_FILE: "{{inst_dir}}/s3cfg"
+  HTS_S3_S3CFG: "{{inst_dir}}/s3cfg"
