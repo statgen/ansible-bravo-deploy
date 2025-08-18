@@ -1,9 +1,12 @@
 # BRAVO Deployment with Ansible
 
-Three roles:
-- Install components & configure.
+This ansible playbook performs three broad tasks:
+- Install and configure components (mounts, credentials, db, app, etc).
 - Download, unpack, and load backing data.
-- Run applications as systemd services.
+- Deploy applications as systemd services.
+
+The [run deployment](#run-deployment) section at the end of this document describes the commands to perform these tasks, or a subset of them, on the hosts
+
 
 ## Dependencies
 - AWS Credentials configured locally.
