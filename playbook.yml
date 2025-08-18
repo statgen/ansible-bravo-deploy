@@ -393,4 +393,4 @@
         daemon_reload: yes
         name: bravo-api.service
         enabled: yes
-        state: started
+        state: reloaded
