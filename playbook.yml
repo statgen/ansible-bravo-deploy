@@ -55,10 +55,11 @@
   tags:
     - dependencies
   tasks:
-    - name: Unzip
+    - name: Unzip and jq
       ansible.builtin.apt:
         name:
           - unzip
+          - jq
         state: present
 
     - name: Download aws cli installer
