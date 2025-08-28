@@ -1,0 +1,26 @@
+---
+- name: Get Tenable deb
+  ansible.builtin.get_url:
+    url: "https://www.tenable.com/downloads/api/v1/public/pages/nessus-agents/downloads/25813/download?i_agree_to_tenable_license_agreement=true"
+    checksum: "sha256:3e8b25882f4b49fa7623eeb08941ecb596e42060479c83240484485017d14191"
+    dest: "{{ansible_facts.user_dir}}/nessus_agent.deb"
+
+- name: Install Tenable agent
+  ansible.builtin.apt:
+    deb: "{{ansible_facts.user_dir}}/nessus_agent.deb"
+
+- name: Copy Tenable config
+  ansible.builtin.template:
+    mode: 0555
+    dest: "/opt/nessus_agent/var/nessus/config.json"
+    src: templates/config.json.j2
+
+- name: Link agent using CLI
+  ansible.builtin.command: "/opt/nessus_agent/sbin/nessuscli agent link --cloud --key={{tenable_key}} --groups={{tenable_groups}}"
+
+- name: Restart Nessus Agent Service
+  ansible.builtin.systemd_service:
+    name: "nessusagent.service"
+    enabled: true
+    state: "restarted"
+

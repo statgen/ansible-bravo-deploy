@@ -37,3 +37,4 @@ scratch*
 
 # sensitive configuration
 group_vars/**/auth.yml
+group_vars/**/tenable.yml

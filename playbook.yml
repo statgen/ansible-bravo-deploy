@@ -71,7 +71,7 @@
         mode: 0755
 
     - name: Install awscli
-      command:
+      ansible.builtin.command:
         cmd: /tmp/aws/install
         creates: /usr/local/bin/aws
 
@@ -126,6 +126,7 @@
       community.general.filesystem:
         dev: "{{blk_device_result.stdout}}"
         fstype: "{{fs_type}}"
+        force: yes
       when: blk_fstype.stdout_lines[0] != fs_type
 
     - name: Reload systemd daemon to pick up ebs mounting services
@@ -182,6 +183,7 @@
     bravo_ref: "main"
   tasks:
     - name: Create API instance dir
+      become: yes
       ansible.builtin.file:
         path: "{{inst_dir}}/api"
         state: directory
@@ -198,7 +200,19 @@
       environment:
         HTSLIB_CONFIGURE_OPTIONS: "--enable-libcurl --enable-s3"
 
-    - name: Create symlink to venv from instance dir
+    # Remove legacy dir structure from instance dir to allow symlinking
+    - name: Stat bravo venv
+      ansible.builtin.stat:
+        path: "{{inst_dir}}/api/venv"
+      register: venv_status
+
+    - name: Remove venv directory in instance directory
+      ansible.builtin.file:
+        path: "{{inst_dir}}/api/venv"
+        state: absent
+      when: venv_status.stat.exists and venv_status.stat.isdir
+
+    - name: Create symlink to venv from instance directory
       ansible.builtin.file:
         path: "{{inst_dir}}/api/venv"
         state: link
@@ -394,3 +408,16 @@
         name: bravo-api.service
         enabled: yes
         state: reloaded
+
+- hosts: "app"
+  become: yes
+  tags:
+    - security
+  vars:
+    tenable_source_name: "{{inventory_hostname}}"
+  tasks:
+    - name: Install Tenable agent
+      ansible.builtin.include_role:
+        name: tenable
+      when: tenable_key is defined
+
