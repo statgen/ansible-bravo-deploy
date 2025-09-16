@@ -1,8 +1,8 @@
 ---
 - name: Get Tenable deb
   ansible.builtin.get_url:
-    url: "https://www.tenable.com/downloads/api/v1/public/pages/nessus-agents/downloads/25813/download?i_agree_to_tenable_license_agreement=true"
-    checksum: "sha256:3e8b25882f4b49fa7623eeb08941ecb596e42060479c83240484485017d14191"
+    url: "https://www.tenable.com/downloads/api/v1/public/pages/nessus-agents/downloads/26428/download?i_agree_to_tenable_license_agreement=true"
+    checksum: "sha256:ea53f738eb77ba08339993e5980e1e952b3e511865997737068d466e34fda427"
     dest: "{{ansible_facts.user_dir}}/nessus_agent.deb"
 
 - name: Install Tenable agent
