@@ -104,8 +104,8 @@ When absent, the generated application config will set `DISABLE_LOGIN` to `true`
 Prior to running ansible, an ssh config and inventory needs to be written.
 The `make_ansible_support_files.sh` script creates these.
 The script is meant to be run from the directory in which it's located.
-By default it reads the terraform cloud project 'bravo-staging'.
-To get the production configs, `export WORKSPACE_NAME=bravo-production` before running the script.
+By default it reads the terraform cloud project 'bravo_staging'.
+To get the production configs, `export WORKSPACE_NAME=bravo_production` before running the script.
 
 The following sub-sections provide the commands for different deployment situations.
 
