@@ -9,8 +9,9 @@
 *.lock
 *.lock.hcl
 
-# Crash log files
+# log files
 crash.log
+run.log
 
 # Ignore any .tfvars files that are generated automatically for each Terraform run.
 *.tfvars
