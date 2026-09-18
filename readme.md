@@ -80,6 +80,7 @@ E.g. in `group_vars/bravo_staging/dirs.yml`:
 ---
 coverage_url: "s3://example-bucket/runtime/coverage"
 sequences_url: "s3://example-bucket/runtime/crams"
+structvar_url: "s3://example-bucket/runtime/structvar"
 ```
 
 ## Data Loading

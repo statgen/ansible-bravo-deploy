@@ -116,7 +116,7 @@
         path: "{{base_dir}}"
         state: directory
 
-    - name: Query block device format 
+    - name: Query block device format
       ansible.builtin.command: "lsblk --noheadings --output FSTYPE {{blk_device_result.stdout}}"
       register: blk_fstype
 
@@ -192,7 +192,7 @@
 
     - name: Build S3 enabled pysam in virtual environment
       ansible.builtin.pip:
-        name: 
+        name:
           - pysam
         virtualenv: "/home/ubuntu/bravo_venv"
         state: present

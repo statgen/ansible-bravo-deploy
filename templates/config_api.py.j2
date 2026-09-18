@@ -35,6 +35,12 @@ REFERENCE_SEQUENCE = "{{base_dir}}/data/runtime/reference/hs38DH.fa"
 PUBVCFS_DIR = "{{pubvcfs_url}}"
 {% endif %}
 
+# Directory for structvar crams
+{% if structvar_url is defined and structvar_url|length %}
+STRUCTVAR_SEQUENCES_DIR = "{{structvar_url}}"
+{% endif %}
+
+
 
 # Optional configuration
 {% if gauth_client_secret is defined and gauth_client_secret|length %}
